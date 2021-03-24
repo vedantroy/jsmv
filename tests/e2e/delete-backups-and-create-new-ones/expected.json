@@ -1,0 +1,16 @@
+{
+  "type": "dir",
+  "name": "temp",
+  "children": [
+    {
+      "type": "file",
+      "name": "foo.backup",
+      "text": "New important data!"
+    },
+    {
+      "type": "file",
+      "name": "foo",
+      "text": "New important data!"
+    }
+  ]
+}

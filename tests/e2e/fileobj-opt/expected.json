@@ -1,0 +1,11 @@
+{
+  "type": "dir",
+  "name": "temp",
+  "children": [
+    {
+      "type": "file",
+      "name": "baz",
+      "text": ""
+    }
+  ]
+}

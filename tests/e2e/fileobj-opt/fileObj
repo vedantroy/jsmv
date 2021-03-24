@@ -1,0 +1,22 @@
+class CustomFileObj {
+  constructor(absDirPath, name, _info) {
+    const absPath = path.join(absDirPath, name);
+    this.path = absPath;
+  }
+
+  deleteIfDir() {
+    const stat = Deno.statSync(this.path);
+    if (stat.isDirectory) {
+      this.opType = "delete";
+    }
+  }
+
+  getOp() {
+    if (this.opType) {
+      return { type: "delete" };
+    }
+    return null;
+  }
+}
+
+return CustomFileObj;

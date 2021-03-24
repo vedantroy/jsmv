@@ -4,12 +4,13 @@ Re-organize files with Javascript.
 
 ## Samples
 
-**Add the ".js" file extension to all files in a directory**
-
+**Add the ".js" extension to all entries in a directory**\
 `jsmv exampledir 'f.mv(f + ".js")`
 
-**Delete all backups and create new ones**
+**Add the ".js" file extension to all files in a directory**\
+`jsmv exampledir 'if (f.isFile) f.mv(f + ".js")`
 
+**Delete all backups and create new ones**\
 `jsmv src "f.endsWith('.backup') ? f.del() : f.mv(f + '.backup')"`
 
 ===
@@ -30,6 +31,8 @@ _Entry_ = The current file/directory being operated on.
 The rough summary:
 
 - Use `del`, `mv`, and `cp` to manipulate the current entry.
+- Use instance variables like `path`, `dirname`, `name`, `isDir`, and `isFile`
+  to get useful info.
 - `f` extends `String` so `f + ".js"` will return "hello.js" if the current
   entry is "hello".
 
@@ -49,3 +52,9 @@ Before any file system changes occur, jsmv will execute the JS snippet on all
 files/directories in the given directory and collect a list of operations to
 execute. This ensures changes are executed semi-atomically since if the JS
 snippet crashes, no file system changes will occur.
+
+### Deletes First
+
+Deletes are done before moves/copies. This allows operations like "remove all
+files with the extension .backup and add the .backup extension to the remaining
+files" without accidentally deleting the newly created backups.

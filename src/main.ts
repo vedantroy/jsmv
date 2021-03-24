@@ -158,7 +158,7 @@ function getPaths(op: Op, name: string): [string, string] {
 const deletePromises = Array.from(toDelete.values()).map((path) => {
   console.log(`rm "${path}"`);
   if (!optPreview) {
-    return Deno.remove(path);
+    return Deno.remove(path, { recursive: true });
   }
 });
 await Promise.all(deletePromises);
