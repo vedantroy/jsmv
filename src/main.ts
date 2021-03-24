@@ -1,8 +1,11 @@
-import { parse } from "https://deno.land/std/flags/mod.ts";
-import * as path from "https://deno.land/std@0.91.0/path/mod.ts";
-import * as fs from "https://deno.land/std/fs/mod.ts";
+import { fs, parse, path } from "@deps.ts";
 import { HELP_MSG } from "./constants.ts";
 import { FileObj, Op, OpType } from "./defaultFileObj.ts";
+
+function fatal(s: string) {
+  console.error(s);
+  Deno.exit(1);
+}
 
 const args = parse(Deno.args, {
   alias: {
@@ -14,9 +17,9 @@ const args = parse(Deno.args, {
     overwrite: "o",
   },
 });
+
 if (args._.length !== 2) {
-  console.error(HELP_MSG);
-  Deno.exit(1);
+  fatal(HELP_MSG);
 }
 
 const optDelete = args.delete || false;
@@ -48,8 +51,7 @@ let [dir, snippetOrFileName] = args._ as [string, string];
 dir = path.resolve(dir);
 
 if (!fs.existsSync(dir)) {
-  console.error(`Path "${dir}" is not a directory.`);
-  Deno.exit(1);
+  fatal(`Path "${dir}" is not a directory.`);
 }
 
 const snippet = fs.existsSync(snippetOrFileName)
@@ -63,8 +65,7 @@ let FileObjClass = FileObj;
 
 if (args.fileObj) {
   if (args.fileObj === true) {
-    console.error("--fileObj requires an argument");
-    Deno.exit(1);
+    fatal("--fileObj requires an argument");
   }
   const text = Deno.readTextFileSync(args.fileObj);
   const f = new Function("FileObj", "fs", "path", text);
@@ -77,7 +78,10 @@ if (args.fileObj) {
   }
 }
 
-function forEach(dir: string, cb: (oldPath: FileObj) => boolean | void) {
+function forEach(
+  dir: string,
+  cb: (oldPath: FileObj) => boolean | void,
+) {
   const dirEntries = Array.from(Deno.readDirSync(dir));
   dirEntries.sort((a, b) => {
     return a.name.localeCompare(b.name);
@@ -116,27 +120,34 @@ forEach(dir, (oldPath) => {
   const op = oldPath.getOp();
   if (op === null) return;
   if (op.type === OpType.DELETE) {
-    console.error(
+    fatal(
       `Tried to delete: "${oldPath.path}" but -d/--delete wasn't set`,
     );
-    Deno.exit(1);
   }
-  if (op !== null) {
-    if (!optOverwrite && (op.type === OpType.COPY || op.type === OpType.MOVE)) {
-      const { oldPath, newPath } = op as any;
-      const overWritingFile = !toDelete.has(newPath) &&
-        (fs.exists(newPath) || newFiles.has(newPath));
-      if (overWritingFile) {
-        console.error(
-          `Tried to overwrite ${newPath} with ${op.type} from "${oldPath}" but -o/--overwrite wasn't set`,
-        );
-        Deno.exit(1);
-      }
-      newFiles.add(newPath);
+  if (!optOverwrite && (op.type === OpType.COPY || op.type === OpType.MOVE)) {
+    const { oldPath, newPath } = op as any;
+    const overWritingFile = !toDelete.has(newPath) &&
+      (fs.existsSync(newPath) || newFiles.has(newPath));
+    if (overWritingFile) {
+      fatal(
+        `Tried to overwrite ${newPath} with ${op.type} from "${oldPath}" but -o/--overwrite wasn't set`,
+      );
     }
-    ops.push(op);
+    newFiles.add(newPath);
   }
+  ops.push(op);
 });
+
+function getPaths(op: Op, name: string): [string, string] {
+  const { oldPath, newPath } = op;
+  if (oldPath === undefined || newPath === undefined) {
+    throw new Error(
+      `Op: ${op} had undefined oldPath or newPath. If using the default FileObj class report this to the developer. Otherwise, check your implementation.`,
+    );
+  }
+  console.log(`${name} "${oldPath}" "${newPath}"`);
+  return [oldPath, newPath];
+}
 
 const deletePromises = Array.from(toDelete.values()).map((path) => {
   console.log(`rm "${path}"`);
@@ -147,21 +158,20 @@ const deletePromises = Array.from(toDelete.values()).map((path) => {
 await Promise.all(deletePromises);
 
 const opPromises = ops.map((op) => {
-  const { oldPath, newPath } = op as any & { oldPath: string; newPath: string };
   if (op.type === OpType.COPY) {
-    console.log(`cp "${oldPath}" "${newPath}"`);
+    const [oldPath, newPath] = getPaths(op, "cp");
     if (!optPreview) {
       return Deno.copyFile(oldPath, newPath);
     }
   } else if (op.type === OpType.MOVE) {
-    console.log(`mv "${oldPath}" "${newPath}"`);
+    const [oldPath, newPath] = getPaths(op, "mv");
     if (!optPreview) {
       // We allow overwrite here b/c we already check for disallowed overwrites above.
       return fs.move(oldPath, newPath, { overwrite: true });
     }
   } else {
     throw new Error(
-      `Unexpected opType: ${op.type}. Report this to the developer.`,
+      `Unexpected operation: ${op}. Report this to the developer.`,
     );
   }
 });

@@ -6,9 +6,11 @@ export const enum OpType {
   COPY = "copy",
 }
 
-export type Op = {
+export interface Op {
   type: OpType;
-} & ({ newPath: string; oldPath: string } | {});
+  newPath?: string;
+  oldPath?: string;
+}
 
 interface IFileObj {
   getOp(): Op | null;
@@ -41,9 +43,18 @@ export class FileObj extends String implements IFileObj {
   getOp(): Op | null {
     if (this._opType === undefined) return null;
     const op: Op = { type: this._opType };
-    if (this._opType !== OpType.DELETE) {
-      (op as any).newPath = this._newPath;
-      (op as any).oldPath = this.path;
+    switch (this._opType) {
+      case OpType.COPY:
+      case OpType.MOVE:
+        op.newPath = this._newPath;
+        op.oldPath = this.path;
+        break;
+      case OpType.DELETE:
+        op.oldPath = this.path;
+      default:
+        throw new Error(
+          `Unexpected OpType: ${this._opType}. Report this to the developer.`,
+        );
     }
     return op;
   }

@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "@tests/": "./tests/",
+    "@deps.ts": "./deps.ts"
+  }
+}
