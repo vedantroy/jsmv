@@ -13,6 +13,11 @@ Re-organize files with Javascript.
 **Delete all backups and create new ones**\
 `jsmv src "f.endsWith('.backup') ? f.del() : f.mv(f + '.backup')"`
 
+**Number files**\
+`jsmv src "f.mv(ctx.i++ + '.js')" --ctx "{i: 0}"`
+
+Look at the [e2e tests](./tests/e2e) for more examples.
+
 ===
 
 ## How to Use
@@ -24,7 +29,10 @@ The command format is `jsmv dir_name snippet_or_file_name <FLAGS>`
 You can either provide a JS snippet or a file that contains a JS snippet.
 
 The JS snippet has access to the variable `f`. By default `f` is described by
-the [defaultFileObj class](./defaultFileObj.ts). It's well commented.
+the [defaultFileObj class](./defaultFileObj.ts). It's well commented. There's
+also `ctx` which is a variable that is persistent between every execution of the
+snippet. It is possible to add/delete properties on `ctx`, but re-assignment is
+impossible.
 
 _Entry_ = The current file/directory being operated on.
 
@@ -43,6 +51,25 @@ If you want `f` to have custom functionality you can implement your own
 
 `JSMOVE_FILEOBJ_PATH` is an optional environment variable to a file path with a
 custom FileObj class. `--fileObj` overrides `JSMOVE_FILEOBJ_PATH`.
+
+## --ctx and JSMOVE_CTX
+
+`--ctx` is a snippet of JS-object-notation (e.g `{foo: "bar"}`) that will be
+executed to create the initial context. Without it, the initial context is
+empty.
+
+`JSMOVE_CTX` operates similarly to `JSMOVE_FILEOBJ_PATH` except it's not a path.
+
+### Guidelines
+
+All custom FileObj classes should implement the `getOp` operation. File system
+operations should not be done directly inside the FileObj class. Rather, an `Op`
+should be returned by `getOp`. This has several benefits:
+
+- Atomicity (explained [here](#Atomicity))
+- jsmv can do checks like
+  - ensuring files are only deleted if `-d` is passed
+  - ensuring moves don't overwrite files unless `-o` is passed
 
 ## Order of Operations
 

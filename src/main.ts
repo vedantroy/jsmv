@@ -29,15 +29,6 @@ const optHelp = args.help || false;
 const optQuiet = args.quiet || false;
 const optOverwrite = args.overwrite || false;
 
-const configPath = Deno.env.get("JSMOVE_FILEOBJ_PATH");
-if (configPath !== undefined && !args.fileObj) {
-  if (!fs.existsSync(configPath)) {
-    console.warn(`No config at "${configPath}"`);
-  } else {
-    args.fileObj = configPath;
-  }
-}
-
 if (optHelp) {
   console.log(HELP_MSG);
   Deno.exit(0);
@@ -59,15 +50,39 @@ const snippet = fs.existsSync(snippetOrFileName)
   : snippetOrFileName;
 // Sand-boxing is decent: `this` is undefined, global variables don't seem to be mutated
 // Probably has holes though.
-const createMutation: (f: FileObj) => void = new Function("f", snippet) as any;
+const createMutation: (f: FileObj, ctx: any) => void = new Function(
+  "f",
+  "ctx",
+  snippet,
+) as any;
 
 let FileObjClass = FileObj;
 
-if (args.fileObj) {
-  if (args.fileObj === true) {
-    fatal("--fileObj requires an argument");
+function envOrOpt(
+  optName: string,
+  isPath: boolean,
+  cb: (optVal: string) => void,
+) {
+  const envName = `JSMOVE_${optName.toUpperCase()}${isPath ? "_PATH" : null}`;
+  const val = Deno.env.get(envName);
+  if (isPath && val !== undefined && !args[optName]) {
+    if (!fs.existsSync(val)) {
+      console.warn(`No file at "${val}" provided by ${envName}`);
+    } else {
+      args[optName] = val;
+    }
   }
-  const text = Deno.readTextFileSync(args.fileObj);
+
+  if (args[optName]) {
+    if (args[optName] === true) {
+      fatal(`--${optName} requires an argument`);
+    }
+    cb(args[optName]);
+  }
+}
+
+envOrOpt("fileObj", true, (p) => {
+  const text = Deno.readTextFileSync(p);
   const f = new Function("FileObj", "fs", "path", text);
   FileObjClass = f(FileObj, fs, path);
   if (typeof FileObjClass !== "function") {
@@ -76,7 +91,18 @@ if (args.fileObj) {
   if (typeof FileObjClass.prototype.getOp !== "function") {
     throw new Error(`Custom fileObj class must have a "getOp" function`);
   }
-}
+});
+
+let ctx = {};
+envOrOpt("ctx", false, (text) => {
+  const toEval = `return ${text}`;
+  try {
+    const f = new Function(toEval);
+    ctx = f();
+  } catch (e) {
+    fatal(`Could not create/execute function created from "${toEval}"`);
+  }
+});
 
 function forEach(
   dir: string,
@@ -92,6 +118,7 @@ function forEach(
         cliArgs: args,
         isDir: isDirectory,
         isFile: isFile,
+        ctx,
       }),
     );
     if (optRecursive) {
@@ -108,7 +135,7 @@ function forEach(
 const toDelete = new Set<string>();
 if (optDelete) {
   forEach(dir, (oldPath) => {
-    createMutation(oldPath);
+    createMutation(oldPath, ctx);
     if (oldPath.getOp()?.type === OpType.DELETE) {
       toDelete.add(oldPath.path);
       return true;
@@ -122,7 +149,7 @@ const newFiles = new Set<string>();
 
 forEach(dir, (oldPath) => {
   if (toDelete.has(oldPath.path)) return;
-  createMutation(oldPath);
+  createMutation(oldPath, ctx);
   const op = oldPath.getOp();
   if (op === null) return;
   if (op.type === OpType.DELETE) {

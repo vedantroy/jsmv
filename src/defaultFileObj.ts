@@ -40,6 +40,7 @@ export class FileObj extends String implements IFileObj {
     isDir: boolean;
     isFile: boolean;
     cliArgs: unknown;
+    ctx: any;
   }) {
     const absPath = path.join(absDirPath, name);
     super(absPath);

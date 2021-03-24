@@ -1,0 +1,21 @@
+{
+  "type": "dir",
+  "name": "temp",
+  "children": [
+    {
+      "type": "file",
+      "name": "1.js",
+      "text": ""
+    },
+    {
+      "type": "file",
+      "name": "0.js",
+      "text": ""
+    },
+    {
+      "type": "file",
+      "name": "2.js",
+      "text": ""
+    }
+  ]
+}
