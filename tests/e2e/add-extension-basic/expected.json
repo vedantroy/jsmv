@@ -1,5 +1,0 @@
-{
-  "type": "dir",
-  "name": "temp",
-  "children": [{ "type": "file", "name": "foo.bar", "text": "" }]
-}

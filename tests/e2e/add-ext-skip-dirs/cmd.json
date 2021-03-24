@@ -1,0 +1,3 @@
+{
+  "params": ["if (f.isDir) return; f.mv(f + \".bar\")"]
+}

@@ -1,4 +1,4 @@
-import * as path from "https://deno.land/std@0.91.0/path/mod.ts";
+import { path } from "@deps.ts";
 
 export const enum OpType {
   DELETE = "delete",
@@ -24,6 +24,11 @@ export class FileObj extends String implements IFileObj {
   dirname: string;
   // The name of the current entry
   name: string;
+  isDir: boolean;
+  isFile: boolean;
+
+  // CLI args passed to the program
+  cliArgs: unknown;
 
   // We use underscore b/c the eval function
   // can still access these "private" properties.
@@ -31,12 +36,19 @@ export class FileObj extends String implements IFileObj {
   private _newPath?: string;
 
   // Custom fileObj classes can accept these 2 parameters
-  constructor(absDirPath: string, name: string) {
+  constructor(absDirPath: string, name: string, info: {
+    isDir: boolean;
+    isFile: boolean;
+    cliArgs: unknown;
+  }) {
     const absPath = path.join(absDirPath, name);
     super(absPath);
     this.path = absPath;
     this.dirname = absDirPath;
     this.name = name;
+    this.isDir = info.isDir;
+    this.isFile = info.isFile;
+    this.cliArgs = info.cliArgs;
   }
 
   // Custom fileObj classes must implement this method
@@ -51,6 +63,7 @@ export class FileObj extends String implements IFileObj {
         break;
       case OpType.DELETE:
         op.oldPath = this.path;
+        break;
       default:
         throw new Error(
           `Unexpected OpType: ${this._opType}. Report this to the developer.`,

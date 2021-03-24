@@ -86,11 +86,17 @@ function forEach(
   dirEntries.sort((a, b) => {
     return a.name.localeCompare(b.name);
   });
-  for (const dirEntry of dirEntries) {
-    const skipChildren = cb(new FileObjClass(dir, dirEntry.name));
+  for (const { name, isDirectory, isFile } of dirEntries) {
+    const skipChildren = cb(
+      new FileObjClass(dir, name, {
+        cliArgs: args,
+        isDir: isDirectory,
+        isFile: isFile,
+      }),
+    );
     if (optRecursive) {
-      if (!skipChildren && dirEntry.isDirectory) {
-        forEach(path.join(dir, dirEntry.name), cb);
+      if (!skipChildren && isDirectory) {
+        forEach(path.join(dir, name), cb);
       }
     }
   }

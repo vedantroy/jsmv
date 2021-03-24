@@ -1,5 +1,5 @@
 class CustomFileObj {
-  constructor(absDirPath, name) {
+  constructor(absDirPath, name, _info) {
     const absPath = path.join(absDirPath, name);
     this.path = absPath;
   }

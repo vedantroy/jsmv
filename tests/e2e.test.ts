@@ -18,8 +18,11 @@ for (const entry of e2eTests) {
       await Deno.readTextFile(path.join(entryPath, "cmd.json")),
     );
     const cmd = `./jsmv ${newPath} ${cmdInfo.params}`;
-    const proc = await Deno.run({ cmd: ["./jsmv", newPath, cmdInfo.params] });
+    const proc = await Deno.run({
+      cmd: ["./jsmv", newPath, ...cmdInfo.params],
+    });
     const status = await proc.status();
+    proc.close();
     if (!status.success) {
       throw new Error(
         `Command: ${cmd} failed`,
@@ -30,14 +33,11 @@ for (const entry of e2eTests) {
     if (!fs.existsSync(expectedPath)) {
       console.log(`Creating new snapshot for ${testName}`);
       const stringified = JSON.stringify(structure, null, 2);
-      console.log(stringified);
       await Deno.writeTextFile(expectedPath, stringified);
     }
     const expected = JSON.parse(
       await Deno.readTextFile(expectedPath),
     );
     assertEquals(structure, expected);
-    // https://github.com/denoland/deno/issues/9885
-    Deno.close(4);
   });
 }
