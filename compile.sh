@@ -1,2 +1,2 @@
 #! /usr/bin/sh
-deno compile --unstable --allow-read --allow-write main.ts
+deno compile --unstable --allow-read --allow-write --allow-env main.ts
