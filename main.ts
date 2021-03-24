@@ -5,7 +5,14 @@ import { HELP_MSG } from "./constants.ts";
 import { FileObj, Op, OpType } from "./defaultFileObj.ts";
 
 const args = parse(Deno.args, {
-  alias: { delete: "d", recursive: "r", preview: "p", help: "h", quiet: "q" },
+  alias: {
+    delete: "d",
+    recursive: "r",
+    preview: "p",
+    help: "h",
+    quiet: "q",
+    overwrite: "o",
+  },
 });
 if (args._.length !== 2) {
   console.error(HELP_MSG);
@@ -17,6 +24,7 @@ const optRecursive = args.recursive || false;
 const optPreview = args.preview || false;
 const optHelp = args.help || false;
 const optQuiet = args.quiet || false;
+const optOverwrite = args.overwrite || false;
 
 if (optHelp) {
   console.log(HELP_MSG);
@@ -24,7 +32,7 @@ if (optHelp) {
 }
 
 if (optQuiet) {
-  console.log = () => {}
+  console.log = () => {};
 }
 
 let [dir, snippetOrFileName] = args._ as [string, string];
@@ -91,6 +99,7 @@ if (optDelete) {
 }
 
 const ops: Op[] = [];
+const newFiles = new Set<string>();
 
 forEach(dir, (oldPath) => {
   if (toDelete.has(oldPath.path)) return;
@@ -99,11 +108,23 @@ forEach(dir, (oldPath) => {
   if (op === null) return;
   if (op.type === OpType.DELETE) {
     console.error(
-      `Tried to delete: "${oldPath.path}" but the delete flag (-d/--delete) wasn't set`,
+      `Tried to delete: "${oldPath.path}" but -d/--delete wasn't set`,
     );
     Deno.exit(1);
   }
   if (op !== null) {
+    if (!optOverwrite && (op.type === OpType.COPY || op.type === OpType.MOVE)) {
+      const { oldPath, newPath } = op as any;
+      const overWritingFile = !toDelete.has(newPath) &&
+        (fs.exists(newPath) || newFiles.has(newPath));
+      if (overWritingFile) {
+        console.error(
+          `Tried to overwrite ${newPath} with ${op.type} from "${oldPath}" but -o/--overwrite wasn't set`,
+        );
+        Deno.exit(1);
+      }
+      newFiles.add(newPath);
+    }
     ops.push(op);
   }
 });
@@ -126,7 +147,8 @@ const opPromises = ops.map((op) => {
   } else if (op.type === OpType.MOVE) {
     console.log(`mv "${oldPath}" "${newPath}"`);
     if (!optPreview) {
-      return fs.move(oldPath, newPath);
+      // We allow overwrite here b/c we already check for disallowed overwrites above.
+      return fs.move(oldPath, newPath, { overwrite: true });
     }
   } else {
     throw new Error(
