@@ -26,7 +26,7 @@ const optHelp = args.help || false;
 const optQuiet = args.quiet || false;
 const optOverwrite = args.overwrite || false;
 
-const configPath = Deno.env.get("EASYMOVE_FILEOBJ_PATH");
+const configPath = Deno.env.get("JSMOVE_FILEOBJ_PATH");
 if (configPath !== undefined && !args.fileObj) {
   if (!fs.existsSync(configPath)) {
     console.warn(`No config at "${configPath}"`);
