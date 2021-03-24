@@ -1,0 +1,9 @@
+// Example `easymv src 'console.log(f.stat)'`
+class FileObjWithStat extends FileObj {
+  constructor(absDirPath, name) {
+    super(absDirPath, name);
+    this.stat = Deno.statSync(this.path);
+  }
+}
+
+return FileObjWithStat;
