@@ -1,6 +1,6 @@
-# easymv
+# jsmv
 
-Re-organize files with Javascript.
+Re-organize files with Javascript. Uses Deno. [Download](https://github.com/vedantroy/jsmv/releases/tag/0.1)
 
 ## Samples
 
@@ -18,11 +18,9 @@ Re-organize files with Javascript.
 
 Look at the [e2e tests](./tests/e2e) for more examples.
 
-===
-
 ## How to Use
 
-easymv runs a Javascript snippet on every file/directory in a given directory.
+jsmv runs a Javascript snippet on every file/directory in a given directory.
 
 The command format is `jsmv dir_name snippet_or_file_name <FLAGS>`
 
