@@ -53,7 +53,7 @@ const snippet = fs.existsSync(snippetOrFileName)
 const createMutation: (f: FileObj, ctx: any) => void = new Function(
   "f",
   "ctx",
-  snippet,
+  snippet
 ) as any;
 
 let FileObjClass = FileObj;
@@ -61,7 +61,7 @@ let FileObjClass = FileObj;
 function envOrOpt(
   optName: string,
   isPath: boolean,
-  cb: (optVal: string) => void,
+  cb: (optVal: string) => void
 ) {
   const envName = `JSMOVE_${optName.toUpperCase()}${isPath ? "_PATH" : null}`;
   const val = Deno.env.get(envName);
@@ -116,7 +116,7 @@ function forEach(dir: string, cb: (oldPath: FileObj) => boolean | void) {
         isDir: isDirectory,
         isFile: isFile,
         ctx,
-      }),
+      })
     );
     if (optRecursive) {
       if (!skipChildren && isDirectory) {
@@ -154,11 +154,12 @@ forEach(dir, (oldPath) => {
   }
   if (!optOverwrite && (op.type === OpType.COPY || op.type === OpType.MOVE)) {
     const { oldPath, newPath } = op as any;
-    const overWritingFile = !toDelete.has(newPath) &&
+    const overWritingFile =
+      !toDelete.has(newPath) &&
       (fs.existsSync(newPath) || newFiles.has(newPath));
     if (overWritingFile) {
       fatal(
-        `Tried to overwrite ${newPath} with ${op.type} from "${oldPath}" but -o/--overwrite wasn't set`,
+        `Tried to overwrite ${newPath} with ${op.type} from "${oldPath}" but -o/--overwrite wasn't set`
       );
     }
     newFiles.add(newPath);
@@ -170,7 +171,7 @@ function getPaths(op: Op, name: string): [string, string] {
   const { oldPath, newPath } = op;
   if (oldPath === undefined || newPath === undefined) {
     throw new Error(
-      `Op: ${op} had undefined oldPath or newPath. If using the default FileObj class report this to the developer. Otherwise, check your implementation.`,
+      `Op: ${op} had undefined oldPath or newPath. If using the default FileObj class report this to the developer. Otherwise, check your implementation.`
     );
   }
   console.log(`${name} "${oldPath}" "${newPath}"`);
@@ -199,7 +200,7 @@ const opPromises = ops.map((op) => {
     }
   } else {
     throw new Error(
-      `Unexpected operation: ${op}. Report this to the developer.`,
+      `Unexpected operation: ${op}. Report this to the developer.`
     );
   }
 });

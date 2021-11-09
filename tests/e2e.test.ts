@@ -1,5 +1,24 @@
 import { getFolderStructure, replace } from "./utils.ts";
-import { assertEquals, fs, path } from "@deps.ts";
+import { assertEquals, fs, path, hash } from "@deps.ts";
+
+function sortArraysInObject(o: any) {
+  if (o === undefined || o === null || typeof o === "string") return;
+  console.log(o);
+  for (const [k, v] of Object.entries(o)) {
+    if (Array.isArray(v)) {
+      o[k] = v.sort((a, b) => {
+        const ha = hash(a);
+        const hb = hash(b);
+        return ha < hb ? 1 : ha === hb ? 0 : -1;
+      });
+      for (const v2 of v) {
+        sortArraysInObject(v2);
+      }
+    } else {
+      sortArraysInObject(v);
+    }
+  }
+}
 
 const __dirname = path.dirname(path.fromFileUrl(import.meta.url));
 
@@ -15,14 +34,14 @@ for (const entry of e2eTests) {
     await fs.copy(oldPath, newPath, { overwrite: true });
 
     const cmdInfo = JSON.parse(
-      await Deno.readTextFile(path.join(entryPath, "cmd.json")),
+      await Deno.readTextFile(path.join(entryPath, "cmd.json"))
     );
     replace(cmdInfo, (o: any) => {
       if (o && o.type === "path") {
         const absPath = path.resolve(entryPath, o.value);
         if (!fs.existsSync(absPath)) {
           throw new Error(
-            `Path ${o.value} transformed to ${absPath} does not exist`,
+            `Path ${o.value} transformed to ${absPath} does not exist`
           );
         }
         return [true, absPath];
@@ -50,6 +69,8 @@ for (const entry of e2eTests) {
       await Deno.writeTextFile(expectedPath, stringified);
     }
     const expected = JSON.parse(await Deno.readTextFile(expectedPath));
+    sortArraysInObject(structure);
+    sortArraysInObject(expected);
     assertEquals(structure, expected);
   });
 }

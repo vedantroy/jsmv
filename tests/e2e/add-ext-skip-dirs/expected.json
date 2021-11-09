@@ -10,7 +10,7 @@
     {
       "type": "dir",
       "name": "bar",
-      "children": []
+      "children": [{ "type": "file", "name": ".gitkeep", "text": "" }]
     }
   ]
 }
