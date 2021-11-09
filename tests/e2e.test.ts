@@ -3,7 +3,6 @@ import { assertEquals, fs, path, hash } from "@deps.ts";
 
 function sortArraysInObject(o: any) {
   if (o === undefined || o === null || typeof o === "string") return;
-  console.log(o);
   for (const [k, v] of Object.entries(o)) {
     if (Array.isArray(v)) {
       o[k] = v.sort((a, b) => {
