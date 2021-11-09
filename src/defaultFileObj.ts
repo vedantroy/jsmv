@@ -36,12 +36,16 @@ export class FileObj extends String implements IFileObj {
   private _newPath?: string;
 
   // Custom fileObj classes can accept these 2 parameters
-  constructor(absDirPath: string, name: string, info: {
-    isDir: boolean;
-    isFile: boolean;
-    cliArgs: unknown;
-    ctx: any;
-  }) {
+  constructor(
+    absDirPath: string,
+    name: string,
+    info: {
+      isDir: boolean;
+      isFile: boolean;
+      cliArgs: unknown;
+      ctx: any;
+    },
+  ) {
     const absPath = path.join(absDirPath, name);
     super(absPath);
     this.path = absPath;

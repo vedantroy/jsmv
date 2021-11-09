@@ -40,10 +40,7 @@ function _getFolderStructure(curPath: string): FSEntry[] {
 // Traverse an object & replace all values that
 // match the replacer function.
 // Doe
-export function replace(
-  obj: any,
-  process: (obj: unknown) => [boolean, any],
-) {
+export function replace(obj: any, process: (obj: unknown) => [boolean, any]) {
   for (const [k, v] of Object.entries(obj)) {
     if (typeof v !== "object" || v === null) continue;
     const [shouldReplace, newObj] = process(v);

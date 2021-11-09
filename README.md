@@ -1,6 +1,7 @@
 # jsmv
 
-Re-organize files with Javascript. Uses Deno. [Download](https://github.com/vedantroy/jsmv/releases/tag/0.1)
+Re-organize files with Javascript. Uses Deno.
+[Download](https://github.com/vedantroy/jsmv/releases/tag/0.1)
 
 ## Samples
 

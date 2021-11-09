@@ -104,10 +104,7 @@ envOrOpt("ctx", false, (text) => {
   }
 });
 
-function forEach(
-  dir: string,
-  cb: (oldPath: FileObj) => boolean | void,
-) {
+function forEach(dir: string, cb: (oldPath: FileObj) => boolean | void) {
   const dirEntries = Array.from(Deno.readDirSync(dir));
   dirEntries.sort((a, b) => {
     return a.name.localeCompare(b.name);
@@ -153,9 +150,7 @@ forEach(dir, (oldPath) => {
   const op = oldPath.getOp();
   if (op === null) return;
   if (op.type === OpType.DELETE) {
-    fatal(
-      `Tried to delete: "${oldPath.path}" but -d/--delete wasn't set`,
-    );
+    fatal(`Tried to delete: "${oldPath.path}" but -d/--delete wasn't set`);
   }
   if (!optOverwrite && (op.type === OpType.COPY || op.type === OpType.MOVE)) {
     const { oldPath, newPath } = op as any;

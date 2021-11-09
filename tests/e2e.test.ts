@@ -40,9 +40,7 @@ for (const entry of e2eTests) {
     const status = await proc.status();
     proc.close();
     if (!status.success) {
-      throw new Error(
-        `Command: ${cmd} failed`,
-      );
+      throw new Error(`Command: ${cmd} failed`);
     }
     const structure = getFolderStructure(newPath);
     const expectedPath = path.join(entryPath, "expected.json");
@@ -51,9 +49,7 @@ for (const entry of e2eTests) {
       const stringified = JSON.stringify(structure, null, 2);
       await Deno.writeTextFile(expectedPath, stringified);
     }
-    const expected = JSON.parse(
-      await Deno.readTextFile(expectedPath),
-    );
+    const expected = JSON.parse(await Deno.readTextFile(expectedPath));
     assertEquals(structure, expected);
   });
 }
