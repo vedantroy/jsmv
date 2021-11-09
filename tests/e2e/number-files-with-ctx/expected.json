@@ -5,17 +5,17 @@
     {
       "type": "file",
       "name": "1.js",
-      "text": ""
+      "text": "b"
     },
     {
       "type": "file",
       "name": "0.js",
-      "text": ""
+      "text": "a"
     },
     {
       "type": "file",
       "name": "2.js",
-      "text": ""
+      "text": "c"
     }
   ]
 }
