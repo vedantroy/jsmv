@@ -74,7 +74,7 @@ export type Callback = (dirTree: Dree, stat: Stats) => void;
  */
 export type CallbackAsync = (
   dirTree: Dree,
-  stat: Stats
+  stat: Stats,
 ) => void | Promise<void>;
 
 /**
@@ -310,8 +310,9 @@ function mergeScanOptions(options?: ScanOptions): ScanOptions {
   let result: ScanOptions = {};
   if (options) {
     for (const key in SCAN_DEFAULT_OPTIONS) {
-      result[key] =
-        options[key] !== undefined ? options[key] : SCAN_DEFAULT_OPTIONS[key];
+      result[key] = options[key] !== undefined
+        ? options[key]
+        : SCAN_DEFAULT_OPTIONS[key];
     }
     if ((result.depth as number) < 0) {
       result.depth = 0;
@@ -326,8 +327,9 @@ function mergeParseOptions(options?: ParseOptions): ParseOptions {
   let result: ParseOptions = {};
   if (options) {
     for (const key in PARSE_DEFAULT_OPTIONS) {
-      result[key] =
-        options[key] !== undefined ? options[key] : PARSE_DEFAULT_OPTIONS[key];
+      result[key] = options[key] !== undefined
+        ? options[key]
+        : PARSE_DEFAULT_OPTIONS[key];
     }
     if ((result.depth as number) < 0) {
       result.depth = 0;
@@ -353,15 +355,16 @@ function _scan(
   depth: number,
   options: ScanOptions,
   onFile?: Callback,
-  onDir?: Callback
+  onDir?: Callback,
 ): Dree | null {
   if (options.depth !== undefined && depth > options.depth) {
     return null;
   }
 
   if (options.exclude && root !== path) {
-    const excludes =
-      options.exclude instanceof RegExp ? [options.exclude] : options.exclude;
+    const excludes = options.exclude instanceof RegExp
+      ? [options.exclude]
+      : options.exclude;
     if (excludes.some((pattern) => pattern.test(path))) {
       return null;
     }
@@ -430,10 +433,9 @@ function _scan(
         try {
           files = readdirSync(path);
           if (options.sorted) {
-            files =
-              typeof options.sorted === "boolean"
-                ? files.sort()
-                : files.sort(options.sorted);
+            files = typeof options.sorted === "boolean"
+              ? files.sort()
+              : files.sort(options.sorted);
           }
         } catch (exception) {
           /* istanbul ignore next */
@@ -453,7 +455,7 @@ function _scan(
             depth + 1,
             options,
             onFile,
-            onDir
+            onDir,
           );
           if (child !== null) {
             children.push(child);
@@ -464,10 +466,9 @@ function _scan(
         }
       }
       if (options.matches && root !== path) {
-        const handledMatches =
-          options.matches instanceof RegExp
-            ? [options.matches]
-            : options.matches;
+        const handledMatches = options.matches instanceof RegExp
+          ? [options.matches]
+          : options.matches;
         if (
           !children.length &&
           handledMatches.some((pattern) => !pattern.test(path))
@@ -478,7 +479,7 @@ function _scan(
       if (options.sizeInBytes || options.size) {
         const size = children.reduce(
           (previous, current) => previous + (current.sizeInBytes as number),
-          0
+          0,
         );
         dirTree.sizeInBytes = size;
         dirTree.size = options.size ? parseSize(size) : undefined;
@@ -506,10 +507,9 @@ function _scan(
         return null;
       }
       if (options.matches && root !== path) {
-        const handledMatches =
-          options.matches instanceof RegExp
-            ? [options.matches]
-            : options.matches;
+        const handledMatches = options.matches instanceof RegExp
+          ? [options.matches]
+          : options.matches;
         if (handledMatches.some((pattern) => !pattern.test(path))) {
           return null;
         }
@@ -556,15 +556,16 @@ async function _scanAsync(
   depth: number,
   options: ScanOptions,
   onFile?: CallbackAsync,
-  onDir?: CallbackAsync
+  onDir?: CallbackAsync,
 ): Promise<Dree | null> {
   if (options.depth !== undefined && depth > options.depth) {
     return null;
   }
 
   if (options.exclude && root !== path) {
-    const excludes =
-      options.exclude instanceof RegExp ? [options.exclude] : options.exclude;
+    const excludes = options.exclude instanceof RegExp
+      ? [options.exclude]
+      : options.exclude;
     if (excludes.some((pattern) => pattern.test(path))) {
       return null;
     }
@@ -633,10 +634,9 @@ async function _scanAsync(
         try {
           files = await readdirAsync(path);
           if (options.sorted) {
-            files =
-              typeof options.sorted === "boolean"
-                ? files.sort()
-                : files.sort(options.sorted);
+            files = typeof options.sorted === "boolean"
+              ? files.sort()
+              : files.sort(options.sorted);
           }
         } catch (exception) {
           /* istanbul ignore next */
@@ -657,10 +657,10 @@ async function _scanAsync(
               depth + 1,
               options,
               onFile,
-              onDir
+              onDir,
             );
             return child;
-          })
+          }),
         );
         children = children.filter((ch) => ch !== null);
         if (options.excludeEmptyDirectories && !children.length) {
@@ -668,10 +668,9 @@ async function _scanAsync(
         }
       }
       if (options.matches && root !== path) {
-        const handledMatches =
-          options.matches instanceof RegExp
-            ? [options.matches]
-            : options.matches;
+        const handledMatches = options.matches instanceof RegExp
+          ? [options.matches]
+          : options.matches;
         if (
           !children.length &&
           handledMatches.some((pattern) => !pattern.test(path))
@@ -682,7 +681,7 @@ async function _scanAsync(
       if (options.sizeInBytes || options.size) {
         const size = children.reduce(
           (previous, current) => previous + (current.sizeInBytes as number),
-          0
+          0,
         );
         dirTree.sizeInBytes = size;
         dirTree.size = options.size ? parseSize(size) : undefined;
@@ -710,10 +709,9 @@ async function _scanAsync(
         return null;
       }
       if (options.matches && root !== path) {
-        const handledMatches =
-          options.matches instanceof RegExp
-            ? [options.matches]
-            : options.matches;
+        const handledMatches = options.matches instanceof RegExp
+          ? [options.matches]
+          : options.matches;
         if (handledMatches.some((pattern) => !pattern.test(path))) {
           return null;
         }
@@ -772,7 +770,7 @@ function _parse(
   children: string[],
   prefix: string,
   options: ParseOptions,
-  depth: number
+  depth: number,
 ): string {
   let result = "";
   const lines = children.map((child, index) => {
@@ -783,8 +781,9 @@ function _parse(
     }
 
     if (options.exclude) {
-      const excludes =
-        options.exclude instanceof RegExp ? [options.exclude] : options.exclude;
+      const excludes = options.exclude instanceof RegExp
+        ? [options.exclude]
+        : options.exclude;
       if (excludes.some((pattern) => pattern.test(child))) {
         return "";
       }
@@ -832,8 +831,8 @@ function _parse(
     }
 
     const last = symbolicLink ? ">>" : type === Type.DIRECTORY ? "─> " : "── ";
-    const newPrefix =
-      prefix + (index === children.length - 1 ? "    " : "│   ");
+    const newPrefix = prefix +
+      (index === children.length - 1 ? "    " : "│   ");
     result += last + name;
 
     if ((options.followLinks || !symbolicLink) && type === Type.DIRECTORY) {
@@ -841,10 +840,9 @@ function _parse(
       try {
         children = readdirSync(child).map((file) => resolve(child, file));
         if (options.sorted) {
-          children =
-            typeof options.sorted === "boolean"
-              ? children.sort()
-              : children.sort(options.sorted);
+          children = typeof options.sorted === "boolean"
+            ? children.sort()
+            : children.sort(options.sorted);
         }
       } catch (exception) {
         /* istanbul ignore next */
@@ -873,7 +871,7 @@ async function _parseAsync(
   children: string[],
   prefix: string,
   options: ParseOptions,
-  depth: number
+  depth: number,
 ): Promise<string> {
   let result = "";
   const lines = await Promise.all(
@@ -885,10 +883,9 @@ async function _parseAsync(
       }
 
       if (options.exclude) {
-        const excludes =
-          options.exclude instanceof RegExp
-            ? [options.exclude]
-            : options.exclude;
+        const excludes = options.exclude instanceof RegExp
+          ? [options.exclude]
+          : options.exclude;
         if (excludes.some((pattern) => pattern.test(child))) {
           return "";
         }
@@ -940,8 +937,8 @@ async function _parseAsync(
         : type === Type.DIRECTORY
         ? "─> "
         : "── ";
-      const newPrefix =
-        prefix + (index === children.length - 1 ? "    " : "│   ");
+      const newPrefix = prefix +
+        (index === children.length - 1 ? "    " : "│   ");
       result += last + name;
 
       if ((options.followLinks || !symbolicLink) && type === Type.DIRECTORY) {
@@ -951,10 +948,9 @@ async function _parseAsync(
             resolve(child, file)
           );
           if (options.sorted) {
-            children =
-              typeof options.sorted === "boolean"
-                ? children.sort()
-                : children.sort(options.sorted);
+            children = typeof options.sorted === "boolean"
+              ? children.sort()
+              : children.sort(options.sorted);
           }
         } catch (exception) {
           /* istanbul ignore next */
@@ -970,7 +966,7 @@ async function _parseAsync(
       }
 
       return result;
-    })
+    }),
   );
   lines
     .filter((line) => !!line)
@@ -984,7 +980,7 @@ function _parseTree(
   children: Dree[],
   prefix: string,
   options: ParseOptions,
-  depth: number
+  depth: number,
 ): string {
   let result = "";
   if (options.sorted) {
@@ -1003,13 +999,12 @@ function _parseTree(
         ? "─> "
         : "── ";
       const line = index === children.length - 1 ? "└" + last : "├" + last;
-      const newPrefix =
-        prefix + (index === children.length - 1 ? "    " : "│   ");
+      const newPrefix = prefix +
+        (index === children.length - 1 ? "    " : "│   ");
       result += prefix + line + child.name;
-      result +=
-        child.children && (options.followLinks || !child.isSymbolicLink)
-          ? _parseTree(child.children, newPrefix, options, depth + 1)
-          : "";
+      result += child.children && (options.followLinks || !child.isSymbolicLink)
+        ? _parseTree(child.children, newPrefix, options, depth + 1)
+        : "";
     });
   return result;
 }
@@ -1018,7 +1013,7 @@ async function _parseTreeAsync(
   children: Dree[],
   prefix: string,
   options: ParseOptions,
-  depth: number
+  depth: number,
 ): Promise<string> {
   let result = "";
   if (options.sorted) {
@@ -1029,7 +1024,7 @@ async function _parseTreeAsync(
     );
   }
   const filteredChildren = children.filter(
-    (child) => !skip(child, options, depth)
+    (child) => !skip(child, options, depth),
   );
   for (let index = 0; index < filteredChildren.length; index++) {
     const child = filteredChildren[index];
@@ -1038,15 +1033,15 @@ async function _parseTreeAsync(
       : child.type === Type.DIRECTORY
       ? "─> "
       : "── ";
-    const line =
-      index === filteredChildren.length - 1 ? "└" + last : "├" + last;
-    const newPrefix =
-      prefix + (index === filteredChildren.length - 1 ? "    " : "│   ");
+    const line = index === filteredChildren.length - 1
+      ? "└" + last
+      : "├" + last;
+    const newPrefix = prefix +
+      (index === filteredChildren.length - 1 ? "    " : "│   ");
     result += prefix + line + child.name;
-    result +=
-      child.children && (options.followLinks || !child.isSymbolicLink)
-        ? await _parseTreeAsync(child.children, newPrefix, options, depth + 1)
-        : "";
+    result += child.children && (options.followLinks || !child.isSymbolicLink)
+      ? await _parseTreeAsync(child.children, newPrefix, options, depth + 1)
+      : "";
   }
   return result;
 }
@@ -1065,7 +1060,7 @@ export function scan(
   path: string,
   options?: ScanOptions,
   onFile?: Callback,
-  onDir?: Callback
+  onDir?: Callback,
 ): Dree {
   const root = resolve(path);
   const opt = mergeScanOptions(options);
@@ -1088,7 +1083,7 @@ export async function scanAsync(
   path: string,
   options?: ScanOptions,
   onFile?: CallbackAsync,
-  onDir?: CallbackAsync
+  onDir?: CallbackAsync,
 ): Promise<Dree> {
   const root = resolve(path);
   const opt = mergeScanOptions(options);
@@ -1142,10 +1137,9 @@ export function parse(path: string, options?: ParseOptions): string {
     try {
       children = readdirSync(root).map((file) => resolve(root, file));
       if (opt.sorted) {
-        children =
-          typeof opt.sorted === "boolean"
-            ? children.sort()
-            : children.sort(opt.sorted);
+        children = typeof opt.sorted === "boolean"
+          ? children.sort()
+          : children.sort(opt.sorted);
       }
     } catch (exception) {
       /* istanbul ignore next */
@@ -1169,7 +1163,7 @@ export function parse(path: string, options?: ParseOptions): string {
  */
 export async function parseAsync(
   path: string,
-  options?: ParseOptions
+  options?: ParseOptions,
 ): Promise<string> {
   let result = "";
 
@@ -1207,10 +1201,9 @@ export async function parseAsync(
     try {
       children = (await readdirAsync(root)).map((file) => resolve(root, file));
       if (opt.sorted) {
-        children =
-          typeof opt.sorted === "boolean"
-            ? children.sort()
-            : children.sort(opt.sorted);
+        children = typeof opt.sorted === "boolean"
+          ? children.sort()
+          : children.sort(opt.sorted);
       }
     } catch (exception) {
       /* istanbul ignore next */
@@ -1248,7 +1241,7 @@ export function parseTree(dirTree: Dree, options?: ParseOptions): string {
  */
 export async function parseTreeAsync(
   dirTree: Dree,
-  options?: ParseOptions
+  options?: ParseOptions,
 ): Promise<string> {
   let result = "";
   const opt = mergeParseOptions(options);
