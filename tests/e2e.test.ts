@@ -1,23 +1,7 @@
-import { getFolderStructure, replace } from "./utils.ts";
-import { assertEquals, fs, path, hash } from "@deps.ts";
-
-function sortArraysInObject(o: any) {
-  if (o === undefined || o === null || typeof o === "string") return;
-  for (const [k, v] of Object.entries(o)) {
-    if (Array.isArray(v)) {
-      o[k] = v.sort((a, b) => {
-        const ha = hash(a);
-        const hb = hash(b);
-        return ha < hb ? 1 : ha === hb ? 0 : -1;
-      });
-      for (const v2 of v) {
-        sortArraysInObject(v2);
-      }
-    } else {
-      sortArraysInObject(v);
-    }
-  }
-}
+import { replace } from "./utils.ts";
+import { assertEquals, fs, hash, path } from "@deps.ts";
+import * as dree from "@lib/dree.ts";
+import deepEqual from "@lib/deep_equal.ts";
 
 const __dirname = path.dirname(path.fromFileUrl(import.meta.url));
 
@@ -29,18 +13,20 @@ for (const entry of e2eTests) {
     const entryPath = path.resolve(e2eTestsDir, entry.name);
     const oldPath = path.resolve(entryPath, "base");
     const newPath = path.resolve(entryPath, "temp");
+    const expectedPath = path.resolve(entryPath, "expected");
+
     await fs.emptyDir(newPath);
     await fs.copy(oldPath, newPath, { overwrite: true });
 
     const cmdInfo = JSON.parse(
-      await Deno.readTextFile(path.join(entryPath, "cmd.json"))
+      await Deno.readTextFile(path.join(entryPath, "cmd.json")),
     );
     replace(cmdInfo, (o: any) => {
       if (o && o.type === "path") {
         const absPath = path.resolve(entryPath, o.value);
         if (!fs.existsSync(absPath)) {
           throw new Error(
-            `Path ${o.value} transformed to ${absPath} does not exist`
+            `Path ${o.value} transformed to ${absPath} does not exist`,
           );
         }
         return [true, absPath];
@@ -60,16 +46,52 @@ for (const entry of e2eTests) {
     if (!status.success) {
       throw new Error(`Command: ${cmd} failed`);
     }
-    const structure = getFolderStructure(newPath);
-    const expectedPath = path.join(entryPath, "expected.json");
+
     if (!fs.existsSync(expectedPath)) {
       console.log(`Creating new snapshot for ${testName}`);
-      const stringified = JSON.stringify(structure, null, 2);
-      await Deno.writeTextFile(expectedPath, stringified);
+      await fs.copy(newPath, expectedPath);
     }
-    const expected = JSON.parse(await Deno.readTextFile(expectedPath));
-    sortArraysInObject(structure);
-    sortArraysInObject(expected);
-    assertEquals(structure, expected);
+
+    const dreeOpts = {
+      stat: false,
+      sizeInBytes: true,
+      size: false,
+      hash: true,
+      showHidden: true,
+      sorted: true,
+    };
+
+    const actual = await dree.scanAsync(newPath, dreeOpts);
+    const expected = await dree.scanAsync(expectedPath, dreeOpts);
+
+    // Remove absolute paths
+    const removePaths = (dirTree: any) => {
+      replace(dirTree, (x: any) => {
+        if (typeof x.path === "string") {
+          const { path, ...theRest } = x;
+          return [true, theRest];
+        }
+        return [false, null];
+      });
+    };
+
+    removePaths(actual);
+    removePaths(expected);
+
+    actual.path = "";
+    actual.name = "";
+    actual.hash = undefined;
+    expected.path = "";
+    expected.name = "";
+    expected.hash = undefined;
+
+    if (!deepEqual(actual, expected)) {
+      console.log(`${newPath} not equal to ${expectedPath}`);
+      console.log("ACTUAL:");
+      console.log(dree.parse(expectedPath));
+      console.log("EXPECTED:");
+      console.log(dree.parse(newPath));
+      assertEquals(actual, expected);
+    }
   });
 }

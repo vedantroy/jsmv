@@ -1,6 +1,7 @@
 {
   "imports": {
     "@tests/": "./tests/",
-    "@deps.ts": "./deps.ts"
+    "@deps.ts": "./deps.ts",
+    "@lib/": "./lib/"
   }
 }
