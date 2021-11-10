@@ -44,7 +44,7 @@ export class FileObj extends String implements IFileObj {
       isFile: boolean;
       cliArgs: unknown;
       ctx: any;
-    },
+    }
   ) {
     const absPath = path.join(absDirPath, name);
     super(absPath);
@@ -71,7 +71,7 @@ export class FileObj extends String implements IFileObj {
         break;
       default:
         throw new Error(
-          `Unexpected OpType: ${this._opType}. Report this to the developer.`,
+          `Unexpected OpType: ${this._opType}. Report this to the developer.`
         );
     }
     return op;
@@ -80,7 +80,7 @@ export class FileObj extends String implements IFileObj {
   private registerOp(opType: OpType) {
     if (this._opType !== undefined) {
       throw new Error(
-        `Cannot do "${opType}" when already done "${this._opType}"`,
+        `Cannot do "${opType}" when already done "${this._opType}"`
       );
     } else {
       this._opType = opType;
