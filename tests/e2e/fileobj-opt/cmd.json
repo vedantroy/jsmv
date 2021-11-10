@@ -3,6 +3,6 @@
     "f.deleteIfDir()",
     "--fileObj",
     { "type": "path", "value": "./fileObj" },
-    "-d"
+    "-dq"
   ]
 }

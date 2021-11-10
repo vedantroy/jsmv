@@ -1,3 +1,3 @@
 {
-  "params": ["f.mv(ctx.i++ + '.new')", "--ctx", "{i: 0}"]
+  "params": ["f.mv(ctx.i++ + '.new')", "--ctx", "{i: 0}", "-q"]
 }

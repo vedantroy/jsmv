@@ -1,6 +1,6 @@
 {
   "params": [
     "if (f.endsWith('.backup')) f.del(); else f.cp(f + '.backup');",
-    "-d"
+    "-dq"
   ]
 }
