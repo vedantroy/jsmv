@@ -1,11 +1,12 @@
+import * as snippetHelpers from "./snippet_helpers.ts";
+
 import { fs, parse, path } from "@deps.ts";
 import { HELP_MSG } from "./constants.ts";
+import { fatal } from "./util.ts";
 import { FileObj, Op, OpType } from "./defaultFileObj.ts";
 
-function fatal(s: string) {
-  console.error(s);
-  Deno.exit(1);
-}
+//@ts-ignore
+String.prototype.iter = () => console.log("hey");
 
 const args = parse(Deno.args, {
   alias: {
@@ -50,9 +51,10 @@ const snippet = fs.existsSync(snippetOrFileName)
   : snippetOrFileName;
 // Sand-boxing is decent: `this` is undefined, global variables don't seem to be mutated
 // Probably has holes though.
-const createMutation: (f: FileObj, ctx: any) => void = new Function(
+const createMutation: (f: FileObj, ctx: any, h: any) => void = new Function(
   "f",
   "ctx",
+  "h",
   snippet,
 ) as any;
 
@@ -132,7 +134,7 @@ function forEach(dir: string, cb: (oldPath: FileObj) => boolean | void) {
 const toDelete = new Set<string>();
 if (optDelete) {
   forEach(dir, (oldPath) => {
-    createMutation(oldPath, ctx);
+    createMutation(oldPath, ctx, snippetHelpers);
     if (oldPath.getOp()?.type === OpType.DELETE) {
       toDelete.add(oldPath.path);
       return true;
@@ -146,7 +148,7 @@ const newFiles = new Set<string>();
 
 forEach(dir, (oldPath) => {
   if (toDelete.has(oldPath.path)) return;
-  createMutation(oldPath, ctx);
+  createMutation(oldPath, ctx, snippetHelpers);
   const op = oldPath.getOp();
   if (op === null) return;
   if (op.type === OpType.DELETE) {
