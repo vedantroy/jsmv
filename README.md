@@ -43,6 +43,12 @@ The rough summary:
 - `f` extends `String` so `f + ".js"` will return "hello.js" if the current
   entry is "hello".
 
+### Helpers
+jsmv currently has 1 helper: `string_map` under the `h` variable which is available to your function.
+Use like so in a snippet: `h.string_map("abc1def2ghi", /\d/, slice => ++parseInt(slice) + "Q")` returns `abc2Qdef3Qghi`. A useful tool if you want, e.g., increase the number in a file name by 1.
+**Warning:** Probably has bugs.
+
+
 ## --fileObj and JSMOVE_FILEOBJ_PATH
 
 If you want `f` to have custom functionality you can implement your own
