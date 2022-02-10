@@ -45,7 +45,9 @@ The rough summary:
 
 ### Helpers
 jsmv currently has 1 helper: `string_map` under the `h` variable which is available to your function.
-Use like so in a snippet: `h.string_map("abc1def2ghi", /\d/, slice => ++parseInt(slice) + "Q")` returns `abc2Qdef3Qghi`. A useful tool if you want, e.g., increase the number in a file name by 1.
+Use like so in a snippet: `"console.log(h.string_map('abc1def2ghi', /\d/, slice => (parseInt(slice) + 1) + 'Q'))"` will print `abc2Qdef3Qghi`
+A useful tool if you want, e.g., increase the number in a file name by 1.
+
 **Warning:** Probably has bugs.
 
 
