@@ -26,8 +26,8 @@ export function string_map(
 
     return newString;
   } else {
-    //@ts-ignore
     console.log(
+      //@ts-ignore
       `Second argument to string_map must be RegExp. Got: ${matcher.constructor.name}`,
     );
     return "";
